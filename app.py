@@ -67,7 +67,7 @@ def get_results():
             }
         )
 
-    return jsonify(returned_list)
+    return jsonify(returned_list[:3])
 
 
 if __name__ == '__main__':
