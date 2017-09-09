@@ -1,9 +1,9 @@
 #!flask/bin/python
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from werkzeug.exceptions import BadRequest, NotImplemented
 import requests
 
-import googlemaps
+# import googlemaps
 # from datetime import datetime
 
 app = Flask(__name__)
@@ -44,8 +44,8 @@ def get_tasks():
     raise NotImplemented("I haven't written this code yet")
 
 
-@app.route('/api/getSearchSuggestions', methods=['GET'])
-def get_suggestions():
+@app.route('/api/getSearchResults', methods=['GET'])
+def get_results():
 
     data = request.args.to_dict()
 
@@ -54,12 +54,20 @@ def get_suggestions():
                      '&query=' + data['query'] +
                      '&key=AIzaSyDp4irqprDYWN5LviRYDJF4zfTi8ZMMObQ')
 
-    newData = r.json()
+    results = r.json()['results']
 
-    print(newData)
-    print(newData['results'][0]['formatted_address'])
+    returned_list = []
 
-    return 'hello, world!'
+    for item in results:
+        returned_list.append(
+            {
+                'name': item['name'],
+                'address': item['formatted_address'],
+                'coords': item['geometry']['location']
+            }
+        )
+
+    return jsonify(returned_list)
 
 
 if __name__ == '__main__':
