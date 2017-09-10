@@ -37,7 +37,7 @@ def get_estimate(data):
     for item in results:
         returned_dict[item['ride_type']] = {
             'display_name': item['display_name'],
-            'length': item['estimated_duration_seconds'],
+            'duration': item['estimated_duration_seconds'],
             'distance': item['estimated_distance_miles'],
             'cost_min': item['estimated_cost_cents_min'],
             'cost_max': item['estimated_cost_cents_max'],
@@ -91,6 +91,7 @@ def get_directions(data):
     walking_results = r2.json()
 
     if transit_results['status'] == "OK":
+        print(transit_results['routes'][0]['legs'][0])
         transit_time = transit_results['routes'][0]['legs'][0]['duration']
     else:
         transit_time = "NOT FOUND"
@@ -185,7 +186,12 @@ def get_combined_data():
             'end_lon': dest_lon
         })
 
-        time_data = get_directions({
+        time_data_to = get_directions({
+            'origin': str(data['lat']) + ',' + str(data['lon']),
+            'destination': str(spot_lat) + ',' + str(spot_lon)
+        })
+
+        time_data_from = get_directions({
             'origin': str(spot_lat) + ',' + str(spot_lon),
             'destination': str(dest_lat) + ',' + str(dest_lon)
         })
@@ -196,7 +202,8 @@ def get_combined_data():
                 'spot_lon': spot_lon
             },
             'lyft_data': lyft_data['lyft'],
-            'time_data': time_data
+            'time_data_from': time_data_from,
+            'time_data_to': time_data_to
         })
 
     return jsonify(return_list)
