@@ -144,16 +144,16 @@ def get_other_spots(data):
         except KeyError:
             factor /= 2
 
-    results = {
-        'original': {
+    results = [
+        {
             "latitude": orig_lat,
             "longitude": orig_lon
         },
-        "other_side": {
+        {
             "latitude": cross_lat,
             "longitude": cross_lon
         }
-    }
+    ]
 
     return results
 
