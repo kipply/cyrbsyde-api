@@ -71,5 +71,21 @@ def get_results():
     return jsonify(returned_list[:3])
 
 
+@app.route('/api/getDirections', methods=['GET'])
+def get_directions():
+
+    data = request.args.to_dict()
+
+    r = requests.get('https://maps.googleapis.com/maps/api/directions/json?' +
+                     '&origin=' + data['origin'].replace(" ", "+") +
+                     '&destination=' + data['destination'].replace(" ", "+") +
+                     '&mode=' + data['mode'] +
+                     '&key=' + key)
+
+    results = r.json()
+
+    return jsonify(results)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
