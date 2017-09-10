@@ -2,46 +2,46 @@
 from flask import Flask, request, jsonify
 from werkzeug.exceptions import BadRequest, NotImplemented
 import requests
+import json
 
-# import googlemaps
 # from datetime import datetime
 
 app = Flask(__name__)
 
-# gmaps = googlemaps.Client(key='AIzaSyDp4irqprDYWN5LviRYDJF4zfTi8ZMMObQ')
-
-# Geocoding an address
-# geocode_result = gmaps.geocode('1600 Amphitheatre Parkway, Mountain View, CA')
-
-# Look up an address with reverse geocoding
-# reverse_geocode_result = gmaps.reverse_geocode((40.714224, -73.961452))
-
-# Request directions via public transit
-# now = datetime.now()
-# directions_result = gmaps.directions("Sydney Town Hall",
-#                                      "Parramatta, NSW",
-#                                      mode="transit",
-#                                      departure_time=now)
-
 
 @app.route('/api/getRideEstimate', methods=['GET'])
 def get_estimate():
-    print("Request:")
     data = request.args.to_dict()
 
-    # Validate that all data points are valid (float lat/long value)
-    for key in data.keys():
-        print(data[key])
-        try:
-            float(data[key])
-        except ValueError:
-            raise BadRequest("Invalid lat/long value!")
-    return 'hello, world!'
+    url = "https://api.lyft.com/v1/cost"
 
+    payload = (
+        '?start_lat=' + data['start_lat'] +
+        '&start_lng=' + data['start_long'] +
+        '&end_lat=' + data['end_lat'] +
+        '&end_lng=' + data['end_long']
+    )
 
-@app.route('/api/getWalkingDistance', methods=['GET'])
-def get_tasks():
-    raise NotImplemented("I haven't written this code yet")
+    header = {
+        'Authorization': 'Bearer 7qpfp4aezbRHX0KnwZvB8w1/9lwqHB2fzcBEZcOIMB6gWZyuQLGx4LEPAf1hscurLEd0xVOx8uvLxh7EkLejdUPr/HlJrlrjVQ2Q+FmqLOuMuceFjKMgTO4='
+    }
+
+    r = requests.get(url + payload, headers=header)
+
+    results = r.json()['cost_estimates']
+
+    returned_dict = {}
+
+    for item in results:
+        returned_dict[item['ride_type']] = {
+            'display_name': item['display_name'],
+            'lemgth': item['estimated_duration_seconds'],
+            'distance': item['estimated_distance_miles'],
+            'cost_min': item['estimated_cost_cents_min'],
+            'cost_max': item['estimated_cost_cents_max'],
+        }
+
+    return jsonify(returned_dict)
 
 
 @app.route('/api/getSearchResults', methods=['GET'])
