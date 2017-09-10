@@ -131,7 +131,7 @@ def get_other_spots(data):
     cross_lon = 0.0
     factor = 1.0
     counter = 0
-
+'''
     while not match:
         if (counter > 5):
             break
@@ -149,6 +149,10 @@ def get_other_spots(data):
         except KeyError:
             factor /= 2
             counter += 1
+'''
+    
+    cross_lat = ((factor + 1) * road_lat) - orig_lat
+    cross_lon = ((factor + 1) * road_lon) - orig_lon
 
     results = [
         {
