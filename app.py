@@ -131,8 +131,11 @@ def get_other_spots(data):
     cross_lat = 0.0
     cross_lon = 0.0
     factor = 1.0
+    counter = 0
 
     while not match:
+        if (counter > 5):
+            break
         cross_lat = ((factor + 1) * road_lat) - orig_lat
         cross_lon = ((factor + 1) * road_lon) - orig_lon
         temp_r = requests.get('https://roads.googleapis.com/v1/nearestRoads?' +
@@ -143,8 +146,10 @@ def get_other_spots(data):
                 match = True            
             else:
                 factor /= 2
+                counter += 1
         except KeyError:
             factor /= 2
+            counter += 1
 
     results = [
         {
