@@ -13,17 +13,15 @@ app = Flask(__name__)
 config = Config()
 
 
-@app.route('/api/getRideEstimate', methods=['GET'])
-def get_estimate():
-    data = request.args.to_dict()
+def get_estimate(data):
 
     url = "https://api.lyft.com/v1/cost"
 
     payload = (
-        '?start_lat=' + data['start_lat'] +
-        '&start_lng=' + data['start_long'] +
-        '&end_lat=' + data['end_lat'] +
-        '&end_lng=' + data['end_long']
+        '?start_lat=' + str(data['start_lat']) +
+        '&start_lng=' + str(data['start_lon']) +
+        '&end_lat=' + str(data['end_lat']) +
+        '&end_lng=' + str(data['end_lon'])
     )
 
     header = {
@@ -45,7 +43,7 @@ def get_estimate():
             'cost_max': item['estimated_cost_cents_max'],
         }
 
-    return jsonify(returned_dict)
+    return returned_dict
 
 
 @app.route('/api/getSearchResults', methods=['GET'])
@@ -89,12 +87,10 @@ def get_directions():
 
     return jsonify(results)
 
-'''
-gets other possible spots for pickup. if user is nowhere near a street, it returns an empty json.
-'''
-@app.route('/api/getOtherPickupSpots', methods=['GET'])
-def get_other_spots():
-    data = request.args.to_dict()
+# gets other possible spots for pickup. if user is nowhere near a street, it returns an empty json.
+
+
+def get_other_spots(data):
 
     orig_lat = float(data['lat'])
     orig_lon = float(data['lon'])
@@ -106,7 +102,7 @@ def get_other_spots():
     if len(r.json()) == 0:
         return jsonify(r.json())
 
-    placeId = r.json()['snappedPoints'][0]['placeId']
+    place_id = r.json()['snappedPoints'][0]['placeId']
     road_lat = float(r.json()['snappedPoints'][0]['location']['latitude'])
     road_lon = float(r.json()['snappedPoints'][0]['location']['longitude'])
 
@@ -119,22 +115,69 @@ def get_other_spots():
     while not match:
         cross_lat = ((factor + 1) * road_lat) - orig_lat
         cross_lon = ((factor + 1) * road_lon) - orig_lon
-        tempR = requests.get('https://roads.googleapis.com/v1/nearestRoads?' + 
-                     'key=' + config.GMAPS_ROADS_KEY +
-                     '&points=' + str(cross_lat) + ',' + str(cross_lon))
-        if (placeId == tempR.json()['snappedPoints'][0]['placeId']):
+        temp_r = requests.get('https://roads.googleapis.com/v1/nearestRoads?' +
+                              'key=' + config.GMAPS_ROADS_KEY +
+                              '&points=' + str(cross_lat) + ',' + str(cross_lon))
+        if place_id == temp_r.json()['snappedPoints'][0]['placeId']:
             match = True
         else:
             factor /= 2
 
     results = {
+        'original': {
+            "latitude": orig_lat,
+            "longitude": orig_lon
+        },
         "other_side": {
             "latitude": cross_lat,
             "longitude": cross_lon
         }
     }
 
-    return jsonify(results)
+    return results
+
+
+@app.route('/api/getCombinedData', methods=['GET'])
+def get_combined_data():
+    data = request.args.to_dict()
+
+    dest_lat = data['dest_lat']
+    dest_lon = data['dest_lon']
+
+    pickup_dict = get_other_spots({
+        'lat': data['lat'],
+        'lon': data['lon']
+    })
+
+    pickup_spots = []
+
+    for key in pickup_dict:
+        pickup_spots.append(pickup_dict[key])
+
+    return_list = []
+
+    for i in pickup_spots:
+        spot_lat = i['latitude']
+        spot_lon = i['longitude']
+
+        lyft_data = get_estimate({
+            'start_lat': spot_lat,
+            'start_lon': spot_lon,
+            'end_lat': dest_lat,
+            'end_lon': dest_lon
+        })
+
+        return_list.append({
+            'spot': {
+                'spot_lat': spot_lat,
+                'spot_lon': spot_lon
+            },
+            'lyft_data': lyft_data['lyft']
+        })
+
+    print(return_list)
+
+    return "Hello, world!"
 
 
 if __name__ == '__main__':
