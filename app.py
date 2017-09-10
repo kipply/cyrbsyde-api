@@ -2,7 +2,6 @@
 from flask import Flask, request, jsonify
 from werkzeug.exceptions import BadRequest, NotImplemented
 import requests
-#from gcpkey import *
 import json
 from config import *
 import math

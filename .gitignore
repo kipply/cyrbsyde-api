@@ -8,9 +8,6 @@ __pycache__/
 # C extensions
 *.so
 
-# google api key
-gcpkey.py
-
 # Distribution / packaging
 .Python
 flask/
