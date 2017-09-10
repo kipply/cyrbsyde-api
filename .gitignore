@@ -172,4 +172,4 @@ develop-eggs
 venv
 *.pyc
 
-config.py
+#config.py
