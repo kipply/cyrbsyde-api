@@ -115,15 +115,16 @@ def get_other_spots(data):
     orig_lon = float(data['lon'])
 
     r = requests.get('https://roads.googleapis.com/v1/nearestRoads?' + 
-                     'key=' + config.GMAPS_ROADS_KEY +
+                     'key=' + config.GMAPS_KEY +
                      '&points=' + str(orig_lat) + ',' + str(orig_lon))
 
     if len(r.json()) == 0:
         return jsonify(r.json())
 
-    place_id = r.json()['snappedPoints'][0]['placeId']
-    road_lat = float(r.json()['snappedPoints'][0]['location']['latitude'])
-    road_lon = float(r.json()['snappedPoints'][0]['location']['longitude'])
+    try:
+        place_id = r.json()['snappedPoints'][0]['placeId']
+        road_lat = float(r.json()['snappedPoints'][0]['location']['latitude'])
+        road_lon = float(r.json()['snappedPoints'][0]['location']['longitude'])
 
     match = False
 
@@ -135,7 +136,7 @@ def get_other_spots(data):
         cross_lat = ((factor + 1) * road_lat) - orig_lat
         cross_lon = ((factor + 1) * road_lon) - orig_lon
         temp_r = requests.get('https://roads.googleapis.com/v1/nearestRoads?' +
-                              'key=' + config.GMAPS_ROADS_KEY +
+                              'key=' + config.GMAPS_KEY +
                               '&points=' + str(cross_lat) + ',' + str(cross_lon))
         try:
             if place_id == temp_r.json()['snappedPoints'][0]['placeId']:
