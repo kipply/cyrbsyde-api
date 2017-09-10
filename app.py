@@ -2,9 +2,10 @@
 from flask import Flask, request, jsonify
 from werkzeug.exceptions import BadRequest, NotImplemented
 import requests
-from gcpkey import *
+#from gcpkey import *
 import json
 from config import *
+import math
 
 # from datetime import datetime
 
@@ -56,7 +57,7 @@ def get_results():
     r = requests.get('https://maps.googleapis.com/maps/api/place/textsearch/json?' +
                      'location=' + data['userLocation'] +
                      '&query=' + data['query'] +
-                     '&key=' + key)
+                     '&key=' + config.GMAPS_KEY)
 
     results = r.json()['results']
 
@@ -83,11 +84,59 @@ def get_directions():
                      '&origin=' + data['origin'].replace(" ", "+") +
                      '&destination=' + data['destination'].replace(" ", "+") +
                      '&mode=' + data['mode'] +
-                     '&key=' + key)
+                     '&key=' + config.GMAPS_KEY)
 
     results = r.json()
 
     return jsonify(results)
+
+'''
+gets other possible spots for pickup. if user is nowhere near a street, it returns an empty json.
+'''
+@app.route('/api/getOtherPickupSpots', methods=['GET'])
+def get_other_spots():
+    data = request.args.to_dict()
+
+    orig_lat = float(data['lat'])
+    orig_lon = float(data['lon'])
+
+    r = requests.get('https://roads.googleapis.com/v1/nearestRoads?' + 
+                     'key=' + config.GMAPS_ROADS_KEY +
+                     '&points=' + str(orig_lat) + ',' + str(orig_lon))
+
+    if len(r.json()) == 0:
+        return jsonify(r.json())
+
+    placeId = r.json()['snappedPoints'][0]['placeId']
+    road_lat = float(r.json()['snappedPoints'][0]['location']['latitude'])
+    road_lon = float(r.json()['snappedPoints'][0]['location']['longitude'])
+
+    match = False
+
+    cross_lat = 0.0
+    cross_lon = 0.0
+    factor = 1.0
+
+    while not match:
+        cross_lat = ((factor + 1) * road_lat) - orig_lat
+        cross_lon = ((factor + 1) * road_lon) - orig_lon
+        tempR = requests.get('https://roads.googleapis.com/v1/nearestRoads?' + 
+                     'key=' + config.GMAPS_ROADS_KEY +
+                     '&points=' + str(cross_lat) + ',' + str(cross_lon))
+        if (placeId == tempR.json()['snappedPoints'][0]['placeId']):
+            match = True
+        else:
+            factor /= 2
+
+    results = {
+        "other_side": {
+            "latitude": cross_lat,
+            "longitude": cross_lon
+        }
+    }
+
+    return jsonify(results)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
