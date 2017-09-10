@@ -171,3 +171,5 @@ develop-eggs
 #Mr Developer
 venv
 *.pyc
+
+config.py

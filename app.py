@@ -4,10 +4,13 @@ from werkzeug.exceptions import BadRequest, NotImplemented
 import requests
 from gcpkey import *
 import json
+from config import *
 
 # from datetime import datetime
 
 app = Flask(__name__)
+
+config = Config()
 
 
 @app.route('/api/getRideEstimate', methods=['GET'])
@@ -24,7 +27,7 @@ def get_estimate():
     )
 
     header = {
-        'Authorization': 'Bearer 7qpfp4aezbRHX0KnwZvB8w1/9lwqHB2fzcBEZcOIMB6gWZyuQLGx4LEPAf1hscurLEd0xVOx8uvLxh7EkLejdUPr/HlJrlrjVQ2Q+FmqLOuMuceFjKMgTO4='
+        'Authorization': config.LYFT_AUTH_HEADER
     }
 
     r = requests.get(url + payload, headers=header)
