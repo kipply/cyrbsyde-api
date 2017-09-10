@@ -30,20 +30,37 @@ def get_estimate(data):
 
     r = requests.get(url + payload, headers=header)
 
-    results = r.json()['cost_estimates']
+    print(r.json())
 
-    returned_dict = {}
+    try:
+        r.json()['error_description']
+    except KeyError:
+        results = r.json()['cost_estimates']
 
-    for item in results:
-        returned_dict[item['ride_type']] = {
-            'display_name': item['display_name'],
-            'duration': item['estimated_duration_seconds'],
-            'distance': item['estimated_distance_miles'],
-            'cost_min': item['estimated_cost_cents_min'],
-            'cost_max': item['estimated_cost_cents_max'],
+        returned_dict = {}
+
+        for item in results:
+            returned_dict[item['ride_type']] = {
+                'display_name': item['display_name'],
+                'duration': item['estimated_duration_seconds'],
+                'distance': item['estimated_distance_miles'],
+                'cost_min': item['estimated_cost_cents_min'],
+                'cost_max': item['estimated_cost_cents_max'],
+            }
+
+        return returned_dict
+    else:
+        return {
+            'lyft': {
+                'display_name': r.json()['error_description'],
+                'duration': 0,
+                'distance': 0,
+                'cost_min': 0,
+                'cost_max': 0,
+            }
         }
 
-    return returned_dict
+
 
 
 @app.route('/api/getSearchResults', methods=['GET'])
