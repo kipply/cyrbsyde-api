@@ -2,6 +2,7 @@
 from flask import Flask, request, jsonify
 from werkzeug.exceptions import BadRequest, NotImplemented
 import requests
+import gcpkey.py
 import json
 
 # from datetime import datetime
@@ -52,7 +53,7 @@ def get_results():
     r = requests.get('https://maps.googleapis.com/maps/api/place/textsearch/json?' +
                      'location=' + data['userLocation'] +
                      '&query=' + data['query'] +
-                     '&key=AIzaSyDp4irqprDYWN5LviRYDJF4zfTi8ZMMObQ')
+                     '&key=' + gcpkey.key)
 
     results = r.json()['results']
 
