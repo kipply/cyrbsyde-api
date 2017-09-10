@@ -121,10 +121,9 @@ def get_other_spots(data):
     if len(r.json()) == 0:
         return jsonify(r.json())
 
-    try:
-        place_id = r.json()['snappedPoints'][0]['placeId']
-        road_lat = float(r.json()['snappedPoints'][0]['location']['latitude'])
-        road_lon = float(r.json()['snappedPoints'][0]['location']['longitude'])
+    place_id = r.json()['snappedPoints'][0]['placeId']
+    road_lat = float(r.json()['snappedPoints'][0]['location']['latitude'])
+    road_lon = float(r.json()['snappedPoints'][0]['location']['longitude'])
 
     match = False
 
