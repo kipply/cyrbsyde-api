@@ -53,7 +53,7 @@ def get_results():
     r = requests.get('https://maps.googleapis.com/maps/api/place/textsearch/json?' +
                      'location=' + data['userLocation'] +
                      '&query=' + data['query'] +
-                     '&key=' + gcpkey.key)
+                     '&key=' + key)
 
     results = r.json()['results']
 
