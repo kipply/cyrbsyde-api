@@ -2,7 +2,7 @@
 from flask import Flask, request, jsonify
 from werkzeug.exceptions import BadRequest, NotImplemented
 import requests
-import gcpkey.py
+from gcpkey import *
 import json
 
 # from datetime import datetime
