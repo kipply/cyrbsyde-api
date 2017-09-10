@@ -166,15 +166,10 @@ def get_combined_data():
     dest_lat = data['dest_lat']
     dest_lon = data['dest_lon']
 
-    pickup_dict = get_other_spots({
+    pickup_spots = get_other_spots({
         'lat': data['lat'],
         'lon': data['lon']
     })
-
-    pickup_spots = []
-
-    for key in pickup_dict:
-        pickup_spots.append(pickup_dict[key])
 
     return_list = []
 
