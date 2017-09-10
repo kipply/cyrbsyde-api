@@ -136,9 +136,12 @@ def get_other_spots(data):
         temp_r = requests.get('https://roads.googleapis.com/v1/nearestRoads?' +
                               'key=' + config.GMAPS_ROADS_KEY +
                               '&points=' + str(cross_lat) + ',' + str(cross_lon))
-        if place_id == temp_r.json()['snappedPoints'][0]['placeId']:
-            match = True
-        else:
+        try:
+            if place_id == temp_r.json()['snappedPoints'][0]['placeId']:
+                match = True            
+            else:
+                factor /= 2
+        except KeyError:
             factor /= 2
 
     results = {
