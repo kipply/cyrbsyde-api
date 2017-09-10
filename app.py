@@ -72,20 +72,38 @@ def get_results():
     return jsonify(returned_list[:3])
 
 
-@app.route('/api/getDirections', methods=['GET'])
-def get_directions():
+def get_directions(data):
 
-    data = request.args.to_dict()
+    r1 = requests.get('https://maps.googleapis.com/maps/api/directions/json?' +
+                      '&origin=' + data['origin'] +
+                      '&destination=' + data['destination'] +
+                      '&mode=transit' +
+                      '&key=' + config.GMAPS_KEY)
 
-    r = requests.get('https://maps.googleapis.com/maps/api/directions/json?' +
-                     '&origin=' + data['origin'].replace(" ", "+") +
-                     '&destination=' + data['destination'].replace(" ", "+") +
-                     '&mode=' + data['mode'] +
-                     '&key=' + config.GMAPS_KEY)
+    transit_results = r1.json()
 
-    results = r.json()
+    r2 = requests.get('https://maps.googleapis.com/maps/api/directions/json?' +
+                      '&origin=' + data['origin'] +
+                      '&destination=' + data['destination'] +
+                      '&mode=walking' +
+                      '&key=' + config.GMAPS_KEY)
 
-    return jsonify(results)
+    walking_results = r2.json()
+
+    if transit_results['status'] == "OK":
+        transit_time = transit_results['routes'][0]['legs'][0]['duration']
+    else:
+        transit_time = "NOT FOUND"
+
+    if walking_results['status'] == "OK":
+        walking_time = walking_results['routes'][0]['legs'][0]['duration']
+    else:
+        walking_time = "NOT FOUND"
+
+    return {
+        'transit_time': transit_time,
+        'walking_time': walking_time
+    }
 
 # gets other possible spots for pickup. if user is nowhere near a street, it returns an empty json.
 
@@ -167,12 +185,18 @@ def get_combined_data():
             'end_lon': dest_lon
         })
 
+        time_data = get_directions({
+            'origin': str(spot_lat) + ',' + str(spot_lon),
+            'destination': str(dest_lat) + ',' + str(dest_lon)
+        })
+
         return_list.append({
             'spot': {
                 'spot_lat': spot_lat,
                 'spot_lon': spot_lon
             },
-            'lyft_data': lyft_data['lyft']
+            'lyft_data': lyft_data['lyft'],
+            'time_data': time_data
         })
 
     return jsonify(return_list)
