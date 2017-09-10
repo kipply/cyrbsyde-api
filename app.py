@@ -37,7 +37,7 @@ def get_estimate(data):
     for item in results:
         returned_dict[item['ride_type']] = {
             'display_name': item['display_name'],
-            'lemgth': item['estimated_duration_seconds'],
+            'length': item['estimated_duration_seconds'],
             'distance': item['estimated_distance_miles'],
             'cost_min': item['estimated_cost_cents_min'],
             'cost_max': item['estimated_cost_cents_max'],
