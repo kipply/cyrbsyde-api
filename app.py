@@ -175,9 +175,7 @@ def get_combined_data():
             'lyft_data': lyft_data['lyft']
         })
 
-    print(return_list)
-
-    return "Hello, world!"
+    return jsonify(return_list)
 
 
 if __name__ == '__main__':
