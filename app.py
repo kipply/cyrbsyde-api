@@ -29,9 +29,7 @@ def get_estimate(data):
     }
 
     r = requests.get(url + payload, headers=header)
-
-    print(r.json())
-
+    
     try:
         r.json()['error_description']
     except KeyError:
